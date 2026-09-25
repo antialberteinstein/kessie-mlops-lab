@@ -1,0 +1,114 @@
+"""Train Raikiri from the default or a user-supplied Python config."""
+
+import argparse
+import importlib.util
+import os
+from dataclasses import asdict, fields, is_dataclass
+from pathlib import Path
+
+# Raikiri trains with PyTorch only. Avoid importing unrelated TensorFlow/Keras
+# integrations from shared environments where their native dependencies may clash.
+os.environ.setdefault("USE_TF", "0")
+os.environ.setdefault("USE_FLAX", "0")
+
+from config import DATA as DEFAULT_DATA
+from config import MODEL as DEFAULT_MODEL
+from config import TRAIN as DEFAULT_TRAIN
+from data import load_corpus, load_or_train_tokenizer, prepare_dataset
+from model import build_model
+
+
+def load_config(config_path=None):
+    """Return DATA, MODEL, and TRAIN from a trusted Python config file."""
+    if config_path is None:
+        return DEFAULT_DATA, DEFAULT_MODEL, DEFAULT_TRAIN
+
+    path = Path(config_path).expanduser().resolve()
+    if path.suffix.lower() != ".py":
+        raise ValueError("The config must be a Python file ending in .py")
+    if not path.is_file():
+        raise FileNotFoundError("Config file does not exist: {}".format(path))
+
+    module_name = "_raikiri_user_config_{}".format(abs(hash(path)))
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise ValueError("Could not load config file: {}".format(path))
+
+    module = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(module)
+    except Exception as error:
+        raise ValueError("Could not execute config file {}: {}".format(path, error)) from error
+
+    names = ("DATA", "MODEL", "TRAIN")
+    missing = [name for name in names if not hasattr(module, name)]
+    if missing:
+        raise ValueError("Config file is missing: {}".format(", ".join(missing)))
+
+    values = (module.DATA, module.MODEL, module.TRAIN)
+    defaults = (DEFAULT_DATA, DEFAULT_MODEL, DEFAULT_TRAIN)
+    invalid = [
+        name
+        for name, value, default in zip(names, values, defaults)
+        if not is_dataclass(value)
+        or isinstance(value, type)
+        or any(not hasattr(value, field.name) for field in fields(default))
+    ]
+    if invalid:
+        raise ValueError("Config values have the wrong type: {}".format(", ".join(invalid)))
+    return values
+
+
+def run_training(data_config, model_config, train_config):
+    """Build and train the model using the supplied configuration objects."""
+    from transformers import Trainer, TrainingArguments, default_data_collator
+
+    corpus = load_corpus(data_config)
+    tokenizer = load_or_train_tokenizer(corpus["train"], data_config)
+    dataset = prepare_dataset(corpus, tokenizer, data_config)
+    model = build_model(tokenizer, model_config, data_config)
+
+    trainer = Trainer(
+        model=model,
+        args=TrainingArguments(
+            **asdict(train_config),
+            eval_strategy="steps",
+            save_strategy="steps",
+            report_to="none",
+            remove_unused_columns=False,
+        ),
+        train_dataset=dataset["train"],
+        eval_dataset=dataset["validation"],
+        data_collator=default_data_collator,
+        processing_class=tokenizer,
+    )
+    trainer.train()
+    trainer.save_model(train_config.output_dir)
+    tokenizer.save_pretrained(train_config.output_dir)
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Train Raikiri with the default config or a trusted Python config file."
+    )
+    parser.add_argument(
+        "config",
+        nargs="?",
+        type=Path,
+        help="optional .py file exporting DATA, MODEL, and TRAIN",
+    )
+    return parser
+
+
+def main(argv=None):
+    parser = build_parser()
+    arguments = parser.parse_args(argv)
+    try:
+        configs = load_config(arguments.config)
+    except (FileNotFoundError, ValueError) as error:
+        parser.error(str(error))
+    run_training(*configs)
+
+
+if __name__ == "__main__":
+    main()

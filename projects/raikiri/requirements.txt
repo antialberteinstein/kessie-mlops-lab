@@ -1,0 +1,9 @@
+accelerate>=1.10,<2
+datasets>=4,<6
+safetensors>=0.4.3
+scipy>=1.13
+scipy==1.13.1; sys_platform == "darwin" and platform_machine == "arm64" and python_version < "3.13"
+tensorboard>=2.16
+tokenizers>=0.21
+torch>=2.6
+transformers==5.2.0
