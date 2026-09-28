@@ -63,6 +63,11 @@ def run_training(data_config, model_config, train_config):
     """Build and train the model using the supplied configuration objects."""
     from transformers import Trainer, TrainingArguments, default_data_collator
 
+    # Transformers 5.x reads this from the environment, not TrainingArguments.logging_dir.
+    tensorboard_dir = Path(train_config.output_dir).parent / "tensorboard"
+    tensorboard_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["TENSORBOARD_LOGGING_DIR"] = str(tensorboard_dir.resolve())
+
     corpus = load_corpus(data_config)
     tokenizer = load_or_train_tokenizer(corpus["train"], data_config)
     dataset = prepare_dataset(corpus, tokenizer, data_config)
@@ -74,7 +79,8 @@ def run_training(data_config, model_config, train_config):
             **asdict(train_config),
             eval_strategy="steps",
             save_strategy="steps",
-            logging_dir=str(Path(train_config.output_dir).parent / "tensorboard"),
+            logging_strategy="steps",
+            logging_first_step=True,
             report_to="tensorboard",
             run_name=model_config.name,
             remove_unused_columns=False,
@@ -85,6 +91,7 @@ def run_training(data_config, model_config, train_config):
         processing_class=tokenizer,
     )
     trainer.train()
+    trainer.evaluate()
     trainer.save_model(train_config.output_dir)
     tokenizer.save_pretrained(train_config.output_dir)
 
