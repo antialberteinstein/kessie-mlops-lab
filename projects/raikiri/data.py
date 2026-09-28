@@ -14,12 +14,27 @@ SPECIAL_TOKENS = {
 }
 
 
-def load_corpus(config: DataConfig):
-    from datasets import DatasetDict, load_dataset
+def _capped_rows(dataset_name, dataset_split, max_samples):
+    """Read a bounded prefix without first downloading the full split."""
+    from datasets import load_dataset
 
-    corpus = load_dataset(config.dataset_name, split=config.dataset_split)
-    if config.max_samples is not None:
-        corpus = corpus.select(range(min(config.max_samples, len(corpus))))
+    yield from load_dataset(dataset_name, split=dataset_split, streaming=True).take(max_samples)
+
+
+def load_corpus(config: DataConfig):
+    from datasets import Dataset, DatasetDict, load_dataset
+
+    if config.max_samples is None:
+        corpus = load_dataset(config.dataset_name, split=config.dataset_split)
+    else:
+        corpus = Dataset.from_generator(
+            _capped_rows,
+            gen_kwargs={
+                "dataset_name": config.dataset_name,
+                "dataset_split": config.dataset_split,
+                "max_samples": config.max_samples,
+            },
+        )
     splits = corpus.train_test_split(test_size=config.validation_fraction, seed=config.seed)
     return DatasetDict(train=splits["train"], validation=splits["test"])
 
