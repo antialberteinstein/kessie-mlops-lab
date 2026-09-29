@@ -2,6 +2,7 @@
 
 import argparse
 import importlib.util
+import json
 import os
 import time
 from contextlib import contextmanager
@@ -124,12 +125,34 @@ def run_training(data_config, model_config, train_config):
             processing_class=tokenizer,
         )
     with training_stage("Training model"):
-        trainer.train()
+        train_output = trainer.train()
     with training_stage("Evaluating model"):
-        trainer.evaluate()
+        eval_metrics = trainer.evaluate()
     with training_stage("Saving model"):
         trainer.save_model(train_config.output_dir)
         tokenizer.save_pretrained(train_config.output_dir)
+        last_loss_log = next(
+            (entry for entry in reversed(trainer.state.log_history) if "loss" in entry),
+            None,
+        )
+        metrics = {
+            "last_logged_train_loss": float(last_loss_log["loss"]) if last_loss_log else None,
+            "last_logged_step": int(last_loss_log["step"]) if last_loss_log else None,
+            "average_train_loss": float(train_output.metrics["train_loss"]),
+            "eval_loss": float(eval_metrics["eval_loss"]),
+            "global_step": int(trainer.state.global_step),
+        }
+        output_dir = Path(train_config.output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "training_metrics.json").write_text(
+            json.dumps(metrics, indent=2) + "\n", encoding="utf-8"
+        )
+    print(
+        "[Raikiri] Last logged training loss: {} at step {}".format(
+            metrics["last_logged_train_loss"], metrics["last_logged_step"]
+        ),
+        flush=True,
+    )
     print("[Raikiri] Training complete: {}".format(train_config.output_dir), flush=True)
 
 

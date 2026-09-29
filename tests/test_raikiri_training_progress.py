@@ -1,9 +1,10 @@
 """Progress reporting for the Raikiri training entry point."""
 
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 from unittest.mock import patch
 
 
@@ -26,12 +27,20 @@ class Rows:
 class FakeTrainer:
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+        self.state = SimpleNamespace(
+            global_step=20,
+            log_history=[
+                {"loss": 2.75, "step": 10},
+                {"loss": 2.25, "step": 20},
+                {"eval_loss": 2.4, "step": 20},
+            ],
+        )
 
     def train(self):
-        pass
+        return SimpleNamespace(metrics={"train_loss": 2.5})
 
     def evaluate(self):
-        pass
+        return {"eval_loss": 2.4}
 
     def save_model(self, output_dir):
         pass
@@ -82,6 +91,14 @@ def test_training_reports_preparation_stages_and_completion(tmp_path, capsys):
     ):
         assert stage in output
     assert "Training complete" in output
+    metrics = json.loads((tmp_path / "checkpoints" / "training_metrics.json").read_text())
+    assert metrics == {
+        "last_logged_train_loss": 2.25,
+        "last_logged_step": 20,
+        "average_train_loss": 2.5,
+        "eval_loss": 2.4,
+        "global_step": 20,
+    }
 
 
 def test_training_reports_failed_stage_before_raising(tmp_path, capsys):
