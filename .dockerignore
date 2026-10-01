@@ -1,0 +1,11 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+artifacts/
+dataset/
+output/
+notebooks/
+tests/
+.DS_Store

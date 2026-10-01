@@ -16,6 +16,49 @@ Transformers Trainer, Accelerate, and PyTorch. Raikiri uses the official pinned
 The defaults use fp16, gradient checkpointing, and PyTorch SDPA. A T4 cannot run
 standard FlashAttention-2, so `attention_backend="auto"` selects SDPA.
 
+## Docker Compose training
+
+Use a Linux host with an NVIDIA GPU, a compatible driver, Docker Compose, and
+the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+The image is based on PyTorch 2.6 with CUDA 11.8 and installs the dependencies in
+[`requirements.txt`](requirements.txt). From the repository root:
+
+```bash
+mkdir -p artifacts/raikiri
+docker compose -f compose.raikiri.yaml up --build -d
+docker compose -f compose.raikiri.yaml logs -f train
+```
+
+The `train` service runs `train.py` directly with unbuffered stdout, so progress
+and errors appear in `docker compose logs`. The `tensorboard` service uses the
+same image and stays available after training finishes at
+<http://127.0.0.1:6006>.
+
+The default read-only dataset mount is `./dataset` on the host to `/datasets` in
+the container. Hugging Face Datasets reads supported text, CSV, JSON, or Parquet
+files in that directory; a local `dataset/tokenizer_train.txt` is one example.
+The first 50,000 rows are used by default. The writable artifact mount
+is `./artifacts/raikiri` to `/workspace/artifacts/raikiri`, containing
+`checkpoints/`, `tokenizer/`, `tensorboard/`, and the Hugging Face cache. These
+files remain on the host when the containers stop.
+
+To use other host directories or expose TensorBoard on a remote server:
+
+```bash
+RAIKIRI_DATA_DIR=/srv/corpus \
+RAIKIRI_ARTIFACT_DIR=/srv/raikiri \
+RAIKIRI_TB_BIND=0.0.0.0 \
+docker compose -f compose.raikiri.yaml up --build -d
+```
+
+Set `RAIKIRI_DATASET_NAME` to another dataset directory inside the container or
+a Hugging Face dataset ID, `RAIKIRI_TEXT_COLUMN` if the text field has another
+name, `RAIKIRI_MAX_SAMPLES` to change the row cap, and `RAIKIRI_TB_PORT` to
+change the host port. TensorBoard has no built-in login, so restrict remote
+access with a firewall or authenticated proxy.
+
+Stop both services with `docker compose -f compose.raikiri.yaml down`.
+
 On an Ampere-or-newer GPU, FlashAttention-2 is optional:
 
 ```bash

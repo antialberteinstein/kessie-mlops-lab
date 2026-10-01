@@ -36,6 +36,20 @@ python projects/raikiri/generate.py
 
 Xem thêm [`projects/raikiri`](projects/raikiri) để biết cấu hình mô hình, thông tin huấn luyện và hướng dẫn sử dụng Google Colab.
 
+### Huấn luyện bằng Docker
+
+Trên máy Linux có NVIDIA GPU và NVIDIA Container Toolkit, chạy từ thư mục gốc:
+
+```bash
+docker compose -f compose.raikiri.yaml up --build -d
+docker compose -f compose.raikiri.yaml logs -f train
+```
+
+Dataset được mount từ `./dataset`, checkpoint và log TensorBoard được lưu tại
+`./artifacts/raikiri`. Mở <http://127.0.0.1:6006> để xem TensorBoard. Xem
+[hướng dẫn Docker chi tiết](projects/raikiri/README.md#docker-compose-training)
+để đổi đường dẫn mount và cổng truy cập.
+
 ## Cấu trúc repository
 
 ```text

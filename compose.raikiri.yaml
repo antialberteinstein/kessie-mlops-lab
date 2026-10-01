@@ -1,0 +1,53 @@
+name: raikiri
+
+x-raikiri-image: &raikiri-image
+  image: raikiri-train:local
+  build:
+    context: .
+    dockerfile: projects/raikiri/Dockerfile
+
+services:
+  train:
+    <<: *raikiri-image
+    init: true
+    environment:
+      RAIKIRI_DATASET_NAME: ${RAIKIRI_DATASET_NAME:-/datasets}
+      RAIKIRI_MAX_SAMPLES: ${RAIKIRI_MAX_SAMPLES:-50000}
+      RAIKIRI_TEXT_COLUMN: ${RAIKIRI_TEXT_COLUMN:-text}
+    volumes:
+      - type: bind
+        source: ${RAIKIRI_DATA_DIR:-./dataset}
+        target: /datasets
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${RAIKIRI_ARTIFACT_DIR:-./artifacts/raikiri}
+        target: /workspace/artifacts/raikiri
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  tensorboard:
+    <<: *raikiri-image
+    init: true
+    command:
+      - tensorboard
+      - --logdir
+      - /workspace/artifacts/raikiri/tensorboard
+      - --host
+      - 0.0.0.0
+      - --port
+      - "6006"
+    ports:
+      - "${RAIKIRI_TB_BIND:-127.0.0.1}:${RAIKIRI_TB_PORT:-6006}:6006"
+    volumes:
+      - type: bind
+        source: ${RAIKIRI_ARTIFACT_DIR:-./artifacts/raikiri}
+        target: /workspace/artifacts/raikiri
+        read_only: true
+    restart: unless-stopped

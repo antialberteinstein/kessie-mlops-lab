@@ -13,7 +13,7 @@ def test_training_shell_cell_is_followed_by_tensorboard():
     training_index = next(index for index, cell in enumerate(cells) if cell.get("id") == "training")
     training = "".join(cells[training_index]["source"])
 
-    assert "!python -u projects/raikiri/train.py" in training
+    assert "!python projects/raikiri/train.py" in training
     assert "subprocess" not in training
     assert cells[training_index + 1]["id"] == "tensorboard"
     assert "%tensorboard --logdir artifacts/raikiri/tensorboard" in "".join(

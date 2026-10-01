@@ -36,6 +36,20 @@ python projects/raikiri/generate.py
 
 See [`projects/raikiri`](projects/raikiri) for model configuration, training details, and Google Colab usage instructions.
 
+### Training with Docker
+
+On a Linux host with an NVIDIA GPU and NVIDIA Container Toolkit:
+
+```bash
+docker compose -f compose.raikiri.yaml up --build -d
+docker compose -f compose.raikiri.yaml logs -f train
+```
+
+The dataset is mounted from `./dataset`; checkpoints and TensorBoard logs are
+stored in `./artifacts/raikiri`. Open <http://127.0.0.1:6006> for TensorBoard.
+See the [Docker instructions](projects/raikiri/README.md#docker-compose-training)
+for custom mounts and ports.
+
 ## Repository structure
 
 ```text
