@@ -44,7 +44,9 @@ def test_colab_cli_is_pinned_in_its_own_uv_project():
     raikiri = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     raikiri_packages = raikiri["project"]["dependencies"] + raikiri["dependency-groups"]["dev"]
 
-    assert tool["project"]["dependencies"] == ["google-colab-cli"]
+    tool_packages = tool["project"]["dependencies"]
+    assert "google-colab-cli" in tool_packages
+    assert any(name.startswith("keyrings-alt") for name in tool_packages)
     assert (tool_dir / "uv.lock").is_file()
     assert not any(name.startswith("google-colab-cli") for name in raikiri_packages)
 
@@ -52,3 +54,13 @@ def test_colab_cli_is_pinned_in_its_own_uv_project():
 def test_colab_notebook_outputs_are_not_committed():
     # `colab exec -f` writes <notebook>_output.ipynb with every cell output next to the notebook.
     assert "*_output.ipynb" in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+
+
+def test_colab_wrapper_keeps_the_oauth_token_out_of_the_macos_keychain():
+    # Agent shells cannot answer Keychain prompts, so the token lives in a 0600 file (ADR 0007).
+    wrapper = ROOT / "scripts" / "colab"
+    source = wrapper.read_text(encoding="utf-8")
+
+    assert wrapper.stat().st_mode & 0o111
+    assert "PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring" in source
+    assert "--project" in source and "tools/colab-cli" in source

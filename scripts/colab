@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pinned Colab CLI for this repo (tools/colab-cli, ADR 0006).
+# The OAuth token is stored in a 0600 file instead of the macOS Keychain so that
+# non-interactive shells (CI-like runs, coding agents) can reuse it (ADR 0007).
+set -euo pipefail
+export PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring
+exec uv run -q --project "$(cd "$(dirname "$0")/.." && pwd)/tools/colab-cli" colab "$@"

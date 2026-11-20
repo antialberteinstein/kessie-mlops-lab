@@ -43,3 +43,8 @@ Mẫu một mục:
 - **Yêu cầu:** Hỏi cách xử lý secret khi chạy bằng Colab CLI. Người dùng chốt: có hai cách chạy, Colab CLI (dùng `.env`) và Colab web (dùng Colab Secrets); Docker chỉ để chạy trực tiếp trên máy có CUDA; Colab CLI cài vào uv của project.
 - **Quyết định:** `google-colab-cli` cần Python ≥ 3.13 nên đặt trong project uv riêng `tools/colab-cli/` (người dùng chọn thay vì chuyển venv local sang 3.13). Token cho Colab CLI: `colab upload` file từ `.env`, notebook đọc xong thì xoá; không dùng `--env` vì token bị ghi vào history ở mọi ô (đã đọc mã nguồn 0.8.0). Bỏ `getpass`. Ghi ADR 0006; phần notebook làm ở #4.
 - **Kết quả:** thêm vào PR #18.
+
+## 2026-11-21 · đăng nhập Colab CLI và chạy thử secret (#4)
+- **Yêu cầu:** Merge PR #18 rồi chạy thử upload secret trên session CPU. Shell của agent không đọc được token trong Keychain; người dùng yêu cầu bỏ việc phụ thuộc Keychain.
+- **Quyết định:** Không sửa code Colab CLI. Thêm wrapper `scripts/colab`, đặt `PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring` (token trong file 0600). Người dùng đăng nhập lại qua wrapper. Ghi ADR 0007.
+- **Kết quả chạy thử:** `colab upload f .raikiri-secrets.env` → `/.raikiri-secrets.env`; kernel đọc được và xoá được; token giả không có trong history; session đã dừng. Nhánh `feat/4-colab-cli-auth`.
