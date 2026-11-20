@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call: # cho phép workflow release gọi lại toàn bộ CI
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v6
+      # Unit test không cần torch hay GPU. Đổi thành `uv run pytest` sau khi có pyproject.toml (ADR 0004).
+      - run: uv run --no-project --python 3.12 --with pytest pytest -q

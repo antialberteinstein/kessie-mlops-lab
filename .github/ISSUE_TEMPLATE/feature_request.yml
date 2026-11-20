@@ -1,0 +1,26 @@
+name: Đề xuất tính năng
+description: Đề xuất khả năng mới hoặc cải thiện cho kessie-mlops-lab.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Mục tiêu người dùng
+      description: Ai cần gì, vì sao.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Hành vi mong muốn
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Tiêu chí nghiệm thu (nếu đã rõ)
+      placeholder: "| AC-01 | Tình huống | Kết quả |"
+  - type: textarea
+    id: scope
+    attributes:
+      label: Ngoài phạm vi / giới hạn

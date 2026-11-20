@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Hướng dẫn chạy và cấu hình
+    url: https://github.com/antialberteinstein/kessie-mlops-lab#readme
+    about: Đọc README trước khi báo lỗi cấu hình.

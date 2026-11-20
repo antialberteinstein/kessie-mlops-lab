@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /projects/raikiri
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      # Ghim cứng để khớp remote code Intern-S2-Mobius đã ghim (ADR 0001); chỉ nâng cùng revision upstream.
+      - dependency-name: "transformers"
+  - package-ecosystem: docker
+    directory: /projects/raikiri
+    schedule:
+      interval: weekly
