@@ -6,6 +6,9 @@ Mọi thay đổi đáng chú ý của kessie-mlops-lab được ghi tại đây
 
 ## [Unreleased]
 
+### Thêm
+- `train.py` dừng ngay khi không có GPU CUDA, trước khi tải dữ liệu; dataset thiếu cột văn bản thì báo tên cột và các cột hiện có, trước khi huấn luyện tokenizer (#15).
+
 ### Thay đổi
 - Cấu hình Raikiri chuyển sang `projects/raikiri/config.json`; biến `RAIKIRI_<MỤC>_<KHOÁ>` ghi đè; code không còn giá trị mặc định. Thiếu khoá hoặc sai kiểu thì dừng với một dòng lỗi đỏ, không traceback (#5).
 - `train.py` nhận đường dẫn một file JSON khác thay vì file cấu hình Python; bỏ `docker_config.py`.

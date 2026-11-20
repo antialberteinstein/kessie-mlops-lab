@@ -31,6 +31,16 @@ def training_stage(label):
     print("[Raikiri] {} done in {:.1f}s".format(label, time.monotonic() - started), flush=True)
 
 
+def require_cuda():
+    """Stop before any download: training uses fp16 and needs an NVIDIA GPU."""
+    import torch
+
+    if not torch.cuda.is_available():
+        raise SystemExit(
+            "[Raikiri] Training needs a CUDA GPU (Colab T4 or a Linux NVIDIA host); none was found."
+        )
+
+
 def run_training(data_config, model_config, train_config):
     """Build and train the model using the supplied configuration objects."""
     with training_stage("Importing training libraries"):
@@ -132,6 +142,7 @@ def main(argv=None):
         configs = load_config(arguments.config)
     except ConfigError as error:
         exit_on_config_error(error)
+    require_cuda()
     run_training(*configs)
 
 

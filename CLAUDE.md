@@ -64,7 +64,7 @@ Chưa có lint/format.
 - `USE_TF=0`/`USE_FLAX=0` được đặt để tránh xung đột TensorFlow trên Colab.
 - Transformers 5.x đọc thư mục log TensorBoard từ biến `TENSORBOARD_LOGGING_DIR`, không từ `TrainingArguments`.
 - Không gọi `uv run --project tools/colab-cli colab` trực tiếp: sẽ dùng Keychain và đòi đăng nhập lại; dùng `scripts/colab`. Đăng nhập OAuth phải do người dùng tự làm trong terminal (cần dán mã).
-- Máy Mac (arm64, không có CUDA) không huấn luyện được. Test đạt không có nghĩa là huấn luyện chạy được: AC cần runtime thật phải được xác minh trên T4 hoặc Linux có GPU.
+- Máy Mac (arm64, không có CUDA) không huấn luyện được: `train.py` dừng ngay sau khi nạp cấu hình nếu không có CUDA (AC-13). Test phải giả lập `torch` khi gọi `train.main`. Test đạt không có nghĩa là huấn luyện chạy được: AC cần runtime thật phải được xác minh trên T4 hoặc Linux có GPU.
 - **Không truyền secret bằng `colab exec --env` hay `colab run --env`:** giá trị bị chèn thành code và ghi vào `~/.config/colab-cli/history/*.jsonl` ở mọi ô. Dùng `colab upload` một file (history chỉ ghi đường dẫn). Đường dẫn đích tính từ gốc `/` của VM: `colab upload f .raikiri-secrets.env` → `/.raikiri-secrets.env` (kernel chạy ở `/content`). `getpass` trong notebook sẽ treo khi chạy bằng `colab exec` (#4).
 - `colab exec -f` ghi `notebooks/*_output.ipynb` chứa mọi output (đã gitignore); không in token trong bất kỳ ô nào.
 
