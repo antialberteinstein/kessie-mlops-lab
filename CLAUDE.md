@@ -26,7 +26,7 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 ```bash
 uv sync                                                      # môi trường đầy đủ từ uv.lock (torch CPU/MPS trên Mac)
 uv run pytest -q                                             # unit test
-uv run --frozen --only-group dev pytest -q                   # đúng lệnh CI: không cài torch
+uv run --isolated --frozen --only-group dev pytest -q        # như CI: môi trường tạm sạch, không có torch/safetensors (không có --isolated thì dùng lại .venv đầy đủ)
 scripts/colab version                                        # Colab CLI qua wrapper (lock riêng, token trong file)
 scripts/colab usage                                          # chưa đăng nhập → người dùng tự chạy trong terminal của họ
 scripts/colab new -s raikiri --gpu T4

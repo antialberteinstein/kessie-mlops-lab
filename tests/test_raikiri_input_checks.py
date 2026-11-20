@@ -130,13 +130,17 @@ class FakeModel:
         self.tied = True
 
 
-def load_with(tmp_path, missing, unexpected):
-    (tmp_path / "model.safetensors").write_bytes(b"")
+def fake_safetensors():
     safetensors_torch = ModuleType("safetensors.torch")
     safetensors_torch.load_file = lambda path, device: {}
+    return {"safetensors": ModuleType("safetensors"), "safetensors.torch": safetensors_torch}
+
+
+def load_with(tmp_path, missing, unexpected):
+    (tmp_path / "model.safetensors").write_bytes(b"")
     fake = FakeModel(missing, unexpected)
     with (
-        patch.dict(sys.modules, {"safetensors": ModuleType("safetensors"), "safetensors.torch": safetensors_torch}),
+        patch.dict(sys.modules, fake_safetensors()),
         patch.object(model, "build_model", return_value=fake),
     ):
         return model.load_trained_model(None, tmp_path, None, None), fake
@@ -162,6 +166,9 @@ def test_checkpoint_key_mismatch_names_the_key(tmp_path, missing, unexpected, ke
 
 
 def test_missing_checkpoint_file_is_reported(tmp_path):
-    with patch.object(model, "build_model", return_value=FakeModel([], [])):
+    with (
+        patch.dict(sys.modules, fake_safetensors()),
+        patch.object(model, "build_model", return_value=FakeModel([], [])),
+    ):
         with pytest.raises(FileNotFoundError, match="model.safetensors"):
             model.load_trained_model(None, tmp_path, None, None)
