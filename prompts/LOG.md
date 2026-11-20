@@ -48,3 +48,12 @@ Mẫu một mục:
 - **Yêu cầu:** Merge PR #18 rồi chạy thử upload secret trên session CPU. Shell của agent không đọc được token trong Keychain; người dùng yêu cầu bỏ việc phụ thuộc Keychain.
 - **Quyết định:** Không sửa code Colab CLI. Thêm wrapper `scripts/colab`, đặt `PYTHON_KEYRING_BACKEND=keyrings.alt.file.PlaintextKeyring` (token trong file 0600). Người dùng đăng nhập lại qua wrapper. Ghi ADR 0007.
 - **Kết quả chạy thử:** `colab upload f .raikiri-secrets.env` → `/.raikiri-secrets.env`; kernel đọc được và xoá được; token giả không có trong history; session đã dừng. Nhánh `feat/4-colab-cli-auth`.
+
+## 2026-11-21 · `/kessie-skills:proj build #5`
+- **Yêu cầu:** Push PR #19 rồi làm #5: cấu hình Raikiri bằng `config.json` + env, không mặc định trong code.
+- **Quyết định (kế hoạch đã duyệt):**
+  - `config.json` chứa đúng giá trị cũ; dataclass giữ tên nhưng bỏ mặc định; env `RAIKIRI_<MỤC>_<KHOÁ>` ghi đè.
+  - Báo lỗi khi thiếu khoá, có khoá lạ hoặc sai kiểu.
+  - `train.py` nhận file JSON khác; bỏ `docker_config.py`.
+  - Compose dùng `compose.raikiri.env` + `${VAR:?}`; biến host đổi tên sang `RAIKIRI_HOST_*`.
+- **Kết quả:** PR cho #5 (nhánh `feat/5-config-json`).

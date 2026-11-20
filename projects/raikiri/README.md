@@ -31,19 +31,23 @@ build of torch. From the repository root:
 
 ```bash
 mkdir -p artifacts/raikiri
-docker compose -f compose.raikiri.yaml up --build -d
-docker compose -f compose.raikiri.yaml logs -f train
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml up --build -d
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml logs -f train
 ```
+
+Compose reads its host-side settings from [`compose.raikiri.env`](../../compose.raikiri.env);
+nothing is defaulted in `compose.raikiri.yaml`, so omitting `--env-file` stops
+with a "required variable" error.
 
 The `train` service runs `train.py` directly with unbuffered stdout, so progress
 and errors appear in `docker compose logs`. The `tensorboard` service uses the
 same image and stays available after training finishes at
 <http://127.0.0.1:6006>.
 
-The default read-only dataset mount is `./dataset` on the host to `/datasets` in
+The read-only dataset mount is `./dataset` on the host to `/datasets` in
 the container. Hugging Face Datasets reads supported text, CSV, JSON, or Parquet
 files in that directory; a local `dataset/tokenizer_train.txt` is one example.
-The first 50,000 rows are used by default. The writable artifact mount
+The row cap comes from `data.max_samples` in [`config.json`](config.json). The writable artifact mount
 is `./artifacts/raikiri` to `/workspace/artifacts/raikiri`, containing
 `checkpoints/`, `tokenizer/`, `tensorboard/`, and the Hugging Face cache. These
 files remain on the host when the containers stop.
@@ -51,19 +55,20 @@ files remain on the host when the containers stop.
 To use other host directories or expose TensorBoard on a remote server:
 
 ```bash
-RAIKIRI_DATA_DIR=/srv/corpus \
-RAIKIRI_ARTIFACT_DIR=/srv/raikiri \
-RAIKIRI_TB_BIND=0.0.0.0 \
-docker compose -f compose.raikiri.yaml up --build -d
+RAIKIRI_HOST_DATASET_DIR=/srv/corpus \
+RAIKIRI_HOST_ARTIFACT_DIR=/srv/raikiri \
+RAIKIRI_HOST_TB_BIND=0.0.0.0 \
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml up --build -d
 ```
 
-Set `RAIKIRI_DATASET_NAME` to another dataset directory inside the container or
-a Hugging Face dataset ID, `RAIKIRI_TEXT_COLUMN` if the text field has another
-name, `RAIKIRI_MAX_SAMPLES` to change the row cap, and `RAIKIRI_TB_PORT` to
+Shell variables override `compose.raikiri.env`. Set `RAIKIRI_DATA_DATASET_NAME`
+to another dataset directory inside the container or a Hugging Face dataset ID,
+`RAIKIRI_DATA_TEXT_COLUMN` if the text field has another name,
+`RAIKIRI_DATA_MAX_SAMPLES` to change the row cap, and `RAIKIRI_HOST_TB_PORT` to
 change the host port. TensorBoard has no built-in login, so restrict remote
 access with a firewall or authenticated proxy.
 
-Stop both services with `docker compose -f compose.raikiri.yaml down`.
+Stop both services with `docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml down`.
 
 On an Ampere-or-newer GPU, FlashAttention-2 is optional:
 
@@ -73,13 +78,26 @@ On an Ampere-or-newer GPU, FlashAttention-2 is optional:
 ```
 
 For block-sparse sliding-window execution on supported hardware, set
-`MODEL.attention_backend` to `"flex_attention"` in `config.py`.
+`model.attention_backend` to `"flex_attention"` in `config.json`.
 
-Edit [`config.py`](config.py) before training. It can also be
-imported normally:
+## Configuration
+
+All settings live in [`config.json`](config.json) (sections `data`, `model`,
+`train`); the code supplies no defaults. Any key can be overridden with an
+environment variable named `RAIKIRI_<SECTION>_<KEY>`:
+
+```bash
+RAIKIRI_DATA_MAX_SAMPLES=1000 RAIKIRI_TRAIN_NUM_TRAIN_EPOCHS=0.1 uv run python projects/raikiri/train.py
+```
+
+Non-string values are parsed as JSON (`1000`, `0.1`, `true`, `null`). A missing
+key, an unknown key, or a value of the wrong type stops the run with a short red
+`[Raikiri] Config error: ...` line that names the key and the file. In Python:
 
 ```python
-from config import DATA, MODEL, TRAIN
+from config import load_config
+
+DATA, MODEL, TRAIN = load_config()
 ```
 
 ## Simple training commands
@@ -97,26 +115,12 @@ From the directory containing `train.py`, the short form is:
 python train.py
 ```
 
-To use another configuration, pass a trusted Python file as the only argument:
+To use another configuration, copy `config.json`, edit the copy, and pass its
+path as the only argument. The copy must contain every key:
 
 ```bash
-python train.py small_config.py
+python train.py small_config.json
 ```
-
-The custom file must export `DATA`, `MODEL`, and `TRAIN`. Import the defaults
-and replace only the settings you want to change:
-
-```python
-# small_config.py
-from dataclasses import replace
-
-from config import DATA, MODEL, TRAIN
-
-DATA = replace(DATA, max_samples=1_000)
-TRAIN = replace(TRAIN, num_train_epochs=0.1)
-```
-
-Config files are executable Python, so only use files you trust.
 
 ## Architecture note
 

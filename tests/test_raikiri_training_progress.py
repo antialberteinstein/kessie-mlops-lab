@@ -76,7 +76,7 @@ def test_training_reports_preparation_stages_and_completion(tmp_path, capsys):
         patch.object(train, "prepare_dataset", return_value=dataset),
         patch.object(train, "build_model", return_value=object()),
     ):
-        train.run_training(object(), train.DEFAULT_MODEL, config)
+        train.run_training(object(), SimpleNamespace(name="raikiri"), config)
 
     assert "Loading corpus..." in output_before_loading[0]
     output = output_before_loading[0] + capsys.readouterr().out
@@ -108,7 +108,7 @@ def test_training_reports_failed_stage_before_raising(tmp_path, capsys):
         patch.object(train, "load_corpus", side_effect=RuntimeError("network unavailable")),
     ):
         try:
-            train.run_training(object(), train.DEFAULT_MODEL, config)
+            train.run_training(object(), SimpleNamespace(name="raikiri"), config)
         except RuntimeError as error:
             assert str(error) == "network unavailable"
         else:

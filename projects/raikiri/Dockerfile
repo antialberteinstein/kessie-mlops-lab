@@ -18,4 +18,4 @@ RUN uv export --project /tmp/raikiri-env --frozen --no-dev --no-emit-project --n
 COPY projects/raikiri /workspace/projects/raikiri
 
 EXPOSE 6006
-CMD ["python", "-u", "projects/raikiri/train.py", "projects/raikiri/docker_config.py"]
+CMD ["python", "-u", "projects/raikiri/train.py"]
