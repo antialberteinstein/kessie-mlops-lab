@@ -9,6 +9,7 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 - Sparse attention: 3 lớp linear attention xen 1 lớp full attention, mask cửa sổ trượt 256, backend `auto` (SDPA trên T4). **Bị loại:** full attention ở mọi lớp; bắt buộc `flex_attention`. [ADR 0002](docs/decisions/0002-sparse-attention-hybrid.md)
 - Huấn luyện bằng HF Trainer; Docker Compose cho máy Linux có GPU; công bố lên HF Hub. [ADR 0003](docs/decisions/0003-huan-luyen-trainer-docker.md)
 - Môi trường dùng **uv**; notebook chạy bằng **Colab CLI** (`google-colab-cli`). **Bị loại:** Colab nối runtime local trên Mac (không có CUDA); pip + Colab web làm đường chính. [ADR 0004](docs/decisions/0004-uv-va-colab-cli.md)
+- Hai cách chạy notebook: **Colab CLI** (`tools/colab-cli/`, project uv riêng vì cần Python ≥ 3.13; token lấy từ `.env` được upload lên VM) và **Colab web** (token lấy từ Colab Secrets). Docker chỉ dùng để train trên máy có CUDA, không công bố model. **Bị loại:** `colab exec --env HF_TOKEN=…` (token bị ghi vào history), `getpass`, `uv tool install`. [ADR 0006](docs/decisions/0006-cach-chay-colab-cli-va-secret.md)
 - Cấu hình: `projects/raikiri/config.json` + biến môi trường ghi đè, **không có giá trị mặc định trong code**; `.env` chỉ chứa secret. **Bị loại:** dataclass có mặc định, file cấu hình dạng Python. [ADR 0005](docs/decisions/0005-cau-hinh-config-json.md). Việc chuyển đổi chưa xong: `config.py` vẫn còn mặc định cho tới khi issue chuyển đổi được merge. Không thêm mặc định mới vào đó.
 
 ## Bố cục
@@ -25,9 +26,10 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 uv sync                                                      # môi trường đầy đủ từ uv.lock (torch CPU/MPS trên Mac)
 uv run pytest -q                                             # unit test
 uv run --frozen --only-group dev pytest -q                   # đúng lệnh CI: không cài torch
-uv tool install google-colab-cli                             # Colab CLI (cài một lần)
-colab new -s raikiri --gpu T4 && colab exec -s raikiri -f notebooks/train-raikiri.ipynb
-colab stop -s raikiri                                        # luôn dừng VM khi xong; xem `colab usage`
+uv run --project tools/colab-cli colab version              # Colab CLI (Python 3.13, lock riêng)
+uv run --project tools/colab-cli colab new -s raikiri --gpu T4
+uv run --project tools/colab-cli colab exec -s raikiri -f notebooks/train-raikiri.ipynb
+uv run --project tools/colab-cli colab stop -s raikiri     # luôn dừng VM khi xong; xem `colab usage`
 docker compose -f compose.raikiri.yaml up --build -d         # chỉ trên Linux có GPU NVIDIA
 ```
 
@@ -58,7 +60,8 @@ Chưa có lint/format.
 - `USE_TF=0`/`USE_FLAX=0` được đặt để tránh xung đột TensorFlow trên Colab.
 - Transformers 5.x đọc thư mục log TensorBoard từ biến `TENSORBOARD_LOGGING_DIR`, không từ `TrainingArguments`.
 - Máy Mac (arm64, không có CUDA) không huấn luyện được. Test đạt không có nghĩa là huấn luyện chạy được: AC cần runtime thật phải được xác minh trên T4 hoặc Linux có GPU.
-- Colab CLI chưa có tài liệu về biến môi trường hay secret; `getpass` trong notebook sẽ treo khi chạy bằng `colab exec`.
+- **Không truyền secret bằng `colab exec --env` hay `colab run --env`:** giá trị bị chèn thành code và ghi vào `~/.config/colab-cli/history/*.jsonl` ở mọi ô. Dùng `colab upload` một file (history chỉ ghi đường dẫn). `getpass` trong notebook sẽ treo khi chạy bằng `colab exec` (#4).
+- `colab exec -f` ghi `notebooks/*_output.ipynb` chứa mọi output (đã gitignore); không in token trong bất kỳ ô nào.
 
 ## Phiên bản và phát hành
 

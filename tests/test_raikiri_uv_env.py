@@ -35,3 +35,20 @@ def test_transformers_stays_pinned_to_the_remote_code_revision():
 
     assert "transformers==5.2.0" in project["project"]["dependencies"]
     assert (ROOT / "uv.lock").is_file()
+
+
+def test_colab_cli_is_pinned_in_its_own_uv_project():
+    # google-colab-cli needs Python >= 3.13; Raikiri must stay installable on 3.11/3.12.
+    tool_dir = ROOT / "tools" / "colab-cli"
+    tool = tomllib.loads((tool_dir / "pyproject.toml").read_text(encoding="utf-8"))
+    raikiri = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    raikiri_packages = raikiri["project"]["dependencies"] + raikiri["dependency-groups"]["dev"]
+
+    assert tool["project"]["dependencies"] == ["google-colab-cli"]
+    assert (tool_dir / "uv.lock").is_file()
+    assert not any(name.startswith("google-colab-cli") for name in raikiri_packages)
+
+
+def test_colab_notebook_outputs_are_not_committed():
+    # `colab exec -f` writes <notebook>_output.ipynb with every cell output next to the notebook.
+    assert "*_output.ipynb" in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
