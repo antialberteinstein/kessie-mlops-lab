@@ -1,5 +1,5 @@
 accelerate>=1.10,<2
-datasets>=4,<6
+datasets>=5.2.0,<6
 safetensors>=0.4.3
 scipy>=1.13
 scipy==1.13.1; sys_platform == "darwin" and platform_machine == "arm64" and python_version < "3.13"
