@@ -75,6 +75,9 @@ Chưa có lint/format.
 |---|---|---|---|
 | `kessie-skills:proj` ([antialberteinstein/kessie-skills](https://github.com/antialberteinstein/kessie-skills)) | Quy trình dự án: kickoff · spec · issue/plan · build · ship · status | Yêu cầu khớp một chế độ (xem mục "Quy trình với AI agent") | `/plugin install kessie-skills --marketplace antialberteinstein/kessie-skills` |
 | `karpathy-guidelines` ([multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills)) | Nghĩ trước khi code · đơn giản trước · sửa đúng chỗ · định nghĩa "xong" bằng tiêu chí kiểm chứng được | Trước khi viết, review hoặc refactor code | `/plugin install andrej-karpathy-skills --marketplace multica-ai/andrej-karpathy-skills` |
+| `pytorch-patterns` | Mẫu PyTorch cho vòng huấn luyện, kiến trúc model, data loading, tái lập kết quả | Trước khi sửa `model.py`, `train.py`, `data.py`, hoặc khi một lần huấn luyện không tái lập được | Skill cục bộ (`~/.claude/skills/`); chưa có thì hỏi chủ repo |
+| `mle-workflow` | Quy trình ML production: hợp đồng dữ liệu, huấn luyện tái lập, đánh giá, theo dõi, rollback | Khi đổi dataset, tokenizer, quy trình đánh giá, hoặc trước khi công bố model lên HF Hub | Skill cục bộ (`~/.claude/skills/`); chưa có thì hỏi chủ repo |
+| `python-testing` | pytest: fixture, mock, parametrize, coverage | Trước khi viết hoặc sửa test trong `tests/` (nhớ mock torch/transformers để CI không cần GPU) | Skill cục bộ (`~/.claude/skills/`); chưa có thì hỏi chủ repo |
 
 - **Agent tự gọi skill** trong bảng bằng Skill tool ngay khi tình huống khớp cột "Khi nào gọi", trước khi làm phần việc đó, và nói một dòng "Dùng skill X để …". Không chờ người dùng gõ lệnh, không hỏi xin phép chỉ để gọi skill. Tự gọi skill không thay cho việc hỏi trước các thao tác ra bên ngoài.
 - Thêm skill vào bảng thì luôn điền cột "Khi nào gọi" bằng tình huống cụ thể.

@@ -23,3 +23,8 @@ Mẫu một mục:
 - **Yêu cầu:** Hỏi bước tiếp theo; agent đề xuất tiếp nhận repo đang có code (`kickoff tiếp nhận .`). Người dùng bổ sung: dùng uv và Colab để chạy notebook; mục đích của Raikiri là một model tiếng Việt nhỏ gọn dùng kiến trúc Mobius và sparse attention.
 - **Quyết định:** Chạy notebook bằng Colab CLI (`google-colab-cli`), không dùng Colab nối runtime local. Cấu hình chuyển sang `config.json` theo quy tắc chung (env ghi đè, không mặc định trong code). PR kickoff gồm CLAUDE.md, idea brief, đặc tả, ADR 0001–0005, CI unit test, Dependabot, nhật ký prompt; phần chuyển sang uv, notebook chạy bằng Colab CLI và chuyển config được tách thành issue riêng. Loại dự án: data/pipeline huấn luyện, phát hành lên HF Hub.
 - **Kết quả:** PR kickoff (nhánh `chore/kickoff-takeover`).
+
+## 2026-11-21 · sau PR kickoff (#2)
+- **Yêu cầu:** Đồng ý ("ok") với ba đề xuất sau PR kickoff: tạo issue cho phần việc đã tách, bật bảo vệ `main`, thêm skill của stack vào CLAUDE.md.
+- **Quyết định:** Thêm `pytorch-patterns`, `mle-workflow`, `python-testing` vào mục "Skill bổ trợ". Issue #3 (uv), #4 (Colab CLI), #5 (`config.json`), #6 (README). Bảo vệ `main` do chủ repo tự bật.
+- **Kết quả:** PR #2, issue #3–#6.
