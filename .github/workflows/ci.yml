@@ -20,5 +20,5 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@v6
-      # Unit test không cần torch hay GPU. Đổi thành `uv run pytest` sau khi có pyproject.toml (ADR 0004).
-      - run: uv run --no-project --python 3.12 --with pytest pytest -q
+      # Unit test không cần torch hay GPU; chỉ cài nhóm dev để tránh tải torch CUDA (~3 GB).
+      - run: uv run --frozen --only-group dev pytest -q

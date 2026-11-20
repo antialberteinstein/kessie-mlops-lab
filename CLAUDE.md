@@ -14,6 +14,7 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 ## Bố cục
 
 - `projects/raikiri/`: `config.py` (cấu hình, sắp chuyển sang JSON) · `data.py` (corpus, tokenizer, đóng gói) · `model.py` (dựng model, adapter) · `train.py` · `generate.py` · `docker_config.py` · `Dockerfile`.
+- `pyproject.toml` + `uv.lock` (gốc repo, project ảo `package = false`): nguồn dependency duy nhất. Thêm hay đổi dependency thì sửa `pyproject.toml` rồi `uv lock`; không tạo lại `requirements.txt`.
 - `notebooks/train-raikiri.ipynb`: luồng Colab đầy đủ. `tests/`: unit test, không cần torch.
 - `compose.raikiri.yaml`: service `train` và `tensorboard`. `/dataset/`, `/artifacts/`, `/output/`: bị gitignore.
 - `docs/`: đặc tả, ADR. `prompts/LOG.md`: nhật ký yêu cầu.
@@ -21,7 +22,9 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 ## Lệnh
 
 ```bash
-uv run --no-project --python 3.12 --with pytest pytest -q    # unit test (giống CI); đổi thành `uv run pytest` sau khi có pyproject
+uv sync                                                      # môi trường đầy đủ từ uv.lock (torch CPU/MPS trên Mac)
+uv run pytest -q                                             # unit test
+uv run --frozen --only-group dev pytest -q                   # đúng lệnh CI: không cài torch
 uv tool install google-colab-cli                             # Colab CLI (cài một lần)
 colab new -s raikiri --gpu T4 && colab exec -s raikiri -f notebooks/train-raikiri.ipynb
 colab stop -s raikiri                                        # luôn dừng VM khi xong; xem `colab usage`
@@ -47,7 +50,9 @@ Chưa có lint/format.
 - **Adapter là cố ý:** `model.py` gắn `_causal_forward` vào class upstream vì revision đã ghim thiếu `forward()`. Đừng xoá khi chưa nâng revision có `forward()`.
 - **Thay mask là cố ý:** `upstream.create_causal_mask = create_sliding_window_causal_mask` bật mask cửa sổ trượt. Nâng `transformers` hoặc revision thì kiểm tra lại tên symbol.
 - **`load_state_dict(strict=False)` là cố ý:** `lm_head.weight` dùng chung trọng số với embedding nên thiếu trong file; mọi khoá thiếu hay thừa khác đều làm hàm báo lỗi.
-- `transformers==5.2.0` được ghim cứng vì phải khớp remote code; Dependabot không được nâng gói này.
+- `transformers==5.2.0` được ghim cứng vì phải khớp remote code; Dependabot không được nâng gói này. Bản này có lỗ hổng đã biết (xem `docs/SECURITY.md`): không nạp config, model hay tokenizer từ nguồn ngoài revision đã ghim và artifact của repo.
+- **Colab và Docker giữ torch có sẵn là cố ý:** cài bằng `uv export … --prune torch` rồi `uv pip install --system`, nên torch (bản CUDA của runtime) không theo `uv.lock`; các gói khác thì theo lock. Đừng bỏ `--prune torch`.
+- `uv.lock` hiện chọn `scipy==1.13.1` cho mọi nền tảng (do dòng ghim cho macOS arm64). Bản này không có wheel cho Python 3.13.
 - `mrope_section` phải cộng lại bằng `head_dim / 2`; đổi `head_dim` thì kiểm tra lại.
 - T4 không chạy được FlashAttention-2 nên `auto` chọn SDPA; đừng ép `flash_attention_2` trên Colab T4.
 - `USE_TF=0`/`USE_FLAX=0` được đặt để tránh xung đột TensorFlow trên Colab.

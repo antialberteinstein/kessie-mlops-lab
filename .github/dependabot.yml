@@ -4,8 +4,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
-  - package-ecosystem: pip
-    directory: /projects/raikiri
+  - package-ecosystem: uv
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

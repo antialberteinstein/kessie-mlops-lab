@@ -33,3 +33,8 @@ Mẫu một mục:
 - **Yêu cầu:** Merge PR #2, xoá nhánh local, duyệt đặc tả, lên kế hoạch milestone 0.1.0.
 - **Quyết định:** Đặc tả v1 (idea brief, outline, Raikiri AC-01 → AC-16) được duyệt. Milestone 0.1.0 "Raikiri chạy đầu-cuối bằng Colab CLI": #3 → #5 → kiểm tra đầu vào → #4 → Verify T4 → #6. Bỏ issue Verify Docker (không có máy Linux có GPU); AC-15 ghi vào "Giới hạn hiện tại".
 - **Kết quả:** PR duyệt đặc tả, milestone 0.1.0, issue mới cho kiểm tra đầu vào và Verify T4.
+
+## 2026-11-21 · `/kessie-skills:proj build #3`
+- **Yêu cầu:** Merge PR #17 rồi làm #3: chuyển môi trường sang uv.
+- **Quyết định:** `pyproject.toml` + `uv.lock` ở gốc repo (project ảo). Trên Colab và Docker giữ torch có sẵn của runtime: cài bằng `uv export --prune torch` + `uv pip install --system`. CI chỉ cài nhóm dev. Audit thấy 6 lỗ hổng ở `transformers==5.2.0`; ghi vào `docs/SECURITY.md`, chưa nâng vì đụng ADR 0001.
+- **Kết quả:** PR cho #3 (nhánh `chore/3-uv`).

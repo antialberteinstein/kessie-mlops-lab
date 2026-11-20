@@ -9,9 +9,14 @@ Transformers Trainer, Accelerate, and PyTorch. Raikiri uses the official pinned
 ```bash
 !git clone <your-repository-url> kessie-mlops-lab
 %cd kessie-mlops-lab
-!pip install -r projects/raikiri/requirements.txt
+!pip install -q uv
+!uv export --frozen --no-dev --no-emit-project --no-hashes --prune torch -o /tmp/raikiri-requirements.txt
+!uv pip install --system -q -r /tmp/raikiri-requirements.txt
 !python projects/raikiri/train.py
 ```
+
+The install keeps Colab's preinstalled CUDA build of torch and installs every
+other dependency at the version pinned in the root `uv.lock`.
 
 The defaults use fp16, gradient checkpointing, and PyTorch SDPA. A T4 cannot run
 standard FlashAttention-2, so `attention_backend="auto"` selects SDPA.
@@ -20,8 +25,9 @@ standard FlashAttention-2, so `attention_backend="auto"` selects SDPA.
 
 Use a Linux host with an NVIDIA GPU, a compatible driver, Docker Compose, and
 the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-The image is based on PyTorch 2.6 with CUDA 11.8 and installs the dependencies in
-[`requirements.txt`](requirements.txt). From the repository root:
+The image is based on PyTorch 2.6 with CUDA 11.8 and installs the locked
+dependencies from the root [`uv.lock`](../../uv.lock), keeping the image's CUDA
+build of torch. From the repository root:
 
 ```bash
 mkdir -p artifacts/raikiri

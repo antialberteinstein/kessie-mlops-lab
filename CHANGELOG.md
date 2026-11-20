@@ -6,6 +6,9 @@ Mọi thay đổi đáng chú ý của kessie-mlops-lab được ghi tại đây
 
 ## [Unreleased]
 
+### Thay đổi
+- Môi trường quản lý bằng uv: `pyproject.toml` + `uv.lock` ở gốc repo thay cho `projects/raikiri/requirements.txt`. Notebook và Docker cài theo lock nhưng giữ torch CUDA có sẵn của runtime (#3).
+
 ### Bảo trì
 - Thêm nền quy trình: CLAUDE.md, idea brief, đặc tả, ADR 0001–0005, CI chạy unit test bằng uv, Dependabot, nhật ký prompt.
 
