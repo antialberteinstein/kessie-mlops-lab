@@ -33,3 +33,13 @@ Mẫu một mục:
 - **Yêu cầu:** Merge PR #2, xoá nhánh local, duyệt đặc tả, lên kế hoạch milestone 0.1.0.
 - **Quyết định:** Đặc tả v1 (idea brief, outline, Raikiri AC-01 → AC-16) được duyệt. Milestone 0.1.0 "Raikiri chạy đầu-cuối bằng Colab CLI": #3 → #5 → kiểm tra đầu vào → #4 → Verify T4 → #6. Bỏ issue Verify Docker (không có máy Linux có GPU); AC-15 ghi vào "Giới hạn hiện tại".
 - **Kết quả:** PR duyệt đặc tả, milestone 0.1.0, issue mới cho kiểm tra đầu vào và Verify T4.
+
+## 2026-11-21 · `/kessie-skills:proj build #3`
+- **Yêu cầu:** Merge PR #17 rồi làm #3: chuyển môi trường sang uv.
+- **Quyết định:** `pyproject.toml` + `uv.lock` ở gốc repo (project ảo). Trên Colab và Docker giữ torch có sẵn của runtime: cài bằng `uv export --prune torch` + `uv pip install --system`. CI chỉ cài nhóm dev. Audit thấy 6 lỗ hổng ở `transformers==5.2.0`; ghi vào `docs/SECURITY.md`, chưa nâng vì đụng ADR 0001.
+- **Kết quả:** PR cho #3 (nhánh `chore/3-uv`).
+
+## 2026-11-21 · thiết kế secret cho Colab CLI (tiếp #3, chuẩn bị #4)
+- **Yêu cầu:** Hỏi cách xử lý secret khi chạy bằng Colab CLI. Người dùng chốt: có hai cách chạy, Colab CLI (dùng `.env`) và Colab web (dùng Colab Secrets); Docker chỉ để chạy trực tiếp trên máy có CUDA; Colab CLI cài vào uv của project.
+- **Quyết định:** `google-colab-cli` cần Python ≥ 3.13 nên đặt trong project uv riêng `tools/colab-cli/` (người dùng chọn thay vì chuyển venv local sang 3.13). Token cho Colab CLI: `colab upload` file từ `.env`, notebook đọc xong thì xoá; không dùng `--env` vì token bị ghi vào history ở mọi ô (đã đọc mã nguồn 0.8.0). Bỏ `getpass`. Ghi ADR 0006; phần notebook làm ở #4.
+- **Kết quả:** thêm vào PR #18.

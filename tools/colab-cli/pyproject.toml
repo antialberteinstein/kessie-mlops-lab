@@ -1,0 +1,11 @@
+# Colab CLI lives in its own uv project: it needs Python >= 3.13, while the
+# Raikiri environment must stay installable on Colab (3.12) and Docker (3.11). See ADR 0006.
+[project]
+name = "kessie-colab-cli"
+version = "0.0.0"
+description = "Pinned Google Colab CLI for running Raikiri notebooks from the terminal."
+requires-python = ">=3.13"
+dependencies = ["google-colab-cli"]
+
+[tool.uv]
+package = false

@@ -1,6 +1,6 @@
 # 0004. uv cho môi trường; Colab CLI để chạy notebook trên runtime Colab
 
-- Trạng thái: Chấp nhận
+- Trạng thái: Chấp nhận; cách cài Colab CLI và cách chạy được thay bởi [0006](0006-cach-chay-colab-cli-va-secret.md)
 - Ngày: 2026-11-21 · Người quyết định: chủ repo
 
 ## Bối cảnh

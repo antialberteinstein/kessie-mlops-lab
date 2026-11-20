@@ -4,14 +4,18 @@ updates:
     directory: /
     schedule:
       interval: weekly
-  - package-ecosystem: pip
-    directory: /projects/raikiri
+  - package-ecosystem: uv
+    directory: /
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
     ignore:
       # Ghim cứng để khớp remote code Intern-S2-Mobius đã ghim (ADR 0001); chỉ nâng cùng revision upstream.
       - dependency-name: "transformers"
+  - package-ecosystem: uv
+    directory: /tools/colab-cli
+    schedule:
+      interval: weekly
   - package-ecosystem: docker
     directory: /projects/raikiri
     schedule:

@@ -9,8 +9,18 @@
 - Log: không log dữ liệu cá nhân hoặc tài chính.
 
 ## Dependency audit
-- Lệnh: `uvx pip-audit -r projects/raikiri/requirements.txt`. Chưa chạy lần nào.
-- Cảnh báo đã biết và lý do chấp nhận tạm thời: chưa có. Không dùng "fix --force" làm hạ cấp framework.
+- Lệnh:
+  ```bash
+  uv export --frozen --no-dev --no-emit-project --no-hashes -o /tmp/audit.txt
+  uvx pip-audit -r /tmp/audit.txt --no-deps --disable-pip
+  ```
+- Lần chạy gần nhất: 2026-11-21 (PR của #3). Kết quả: 6 cảnh báo, tất cả ở `transformers==5.2.0`; các gói khác không có cảnh báo.
+- Cảnh báo đã biết và lý do chấp nhận tạm thời: `transformers==5.2.0` bị ghim theo remote code Mobius (ADR 0001).
+  - PYSEC-2026-2289: RCE qua `config.json` độc hại; sửa ở 5.3.0.
+  - PYSEC-2026-2290: chạy code khi nạp LightGlue; chưa có bản sửa.
+  - PYSEC-2026-3929: ghi file tuỳ ý (path traversal) trong `save_pretrained()` của tokenizer/processor; sửa ở 5.10.0.
+  - PYSEC-2026-4174: `load_custom_generate()` ghi file Python từ xa; chưa có bản sửa.
+  - Lý do chấp nhận tạm thời: Raikiri chỉ nạp config từ revision upstream đã ghim, tokenizer là artifact của chính repo, không dùng LightGlue hay `load_custom_generate`. Không nạp config, model hay tokenizer từ nguồn khác khi chưa nâng `transformers`. Việc nâng cần kiểm tra lại adapter trong `model.py` và cần chủ repo quyết (ADR 0001). Không dùng "fix --force" làm hạ cấp framework.
 
 ## Giới hạn vận hành
 - TensorBoard không có đăng nhập; mặc định bind `127.0.0.1`. Mở ra ngoài thì phải có firewall hoặc proxy có xác thực.

@@ -8,8 +8,12 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /workspace
 
-COPY projects/raikiri/requirements.txt /tmp/raikiri-requirements.txt
-RUN python -m pip install --no-cache-dir -r /tmp/raikiri-requirements.txt
+COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /bin/uv
+# Install locked dependencies but keep the image's CUDA build of torch (ADR 0004).
+COPY pyproject.toml uv.lock /tmp/raikiri-env/
+RUN uv export --project /tmp/raikiri-env --frozen --no-dev --no-emit-project --no-hashes --prune torch \
+        -o /tmp/raikiri-requirements.txt \
+    && uv pip install --system --no-cache -r /tmp/raikiri-requirements.txt
 
 COPY projects/raikiri /workspace/projects/raikiri
 

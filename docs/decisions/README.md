@@ -9,6 +9,7 @@ Mỗi quyết định quan trọng là một file `NNNN-tieu-de-ngan.md` (đánh
 | [0003](0003-huan-luyen-trainer-docker.md) | Huấn luyện bằng HF Trainer; Docker Compose; công bố lên HF Hub | Chấp nhận (hồi tố) | 2026-11-21 |
 | [0004](0004-uv-va-colab-cli.md) | uv cho môi trường; Colab CLI để chạy notebook | Chấp nhận | 2026-11-21 |
 | [0005](0005-cau-hinh-config-json.md) | Cấu hình `config.json` + env ghi đè, không mặc định trong code | Chấp nhận | 2026-11-21 |
+| [0006](0006-cach-chay-colab-cli-va-secret.md) | Hai cách chạy (Colab CLI, Colab web); Colab CLI trong project uv riêng; nguồn `HF_TOKEN` theo từng cách | Chấp nhận | 2026-11-21 |
 
 ## Mẫu
 

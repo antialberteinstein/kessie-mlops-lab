@@ -26,12 +26,16 @@ The Google Colab notebook automatically:
 
 ### Running locally
 
+Requires [uv](https://docs.astral.sh/uv/). Training needs an NVIDIA GPU.
+
 ```bash
-python -m pip install -r projects/raikiri/requirements.txt
+uv sync
 
-python projects/raikiri/train.py
+uv run python projects/raikiri/train.py
 
-python projects/raikiri/generate.py
+uv run python projects/raikiri/generate.py
+
+uv run pytest   # unit tests, no GPU needed
 ```
 
 See [`projects/raikiri`](projects/raikiri) for model configuration, training details, and Google Colab usage instructions.

@@ -1,0 +1,23 @@
+[project]
+name = "kessie-mlops-lab"
+version = "0.0.0"
+description = "Personal LLMOps lab; first experiment: Raikiri, a compact Vietnamese Mobius language model."
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate>=1.10,<2",
+    "datasets>=4,<6",
+    "safetensors>=0.4.3",
+    "scipy>=1.13",
+    "scipy==1.13.1; sys_platform == 'darwin' and platform_machine == 'arm64' and python_version < '3.13'",
+    "tensorboard>=2.16",
+    "tokenizers>=0.21",
+    "torch>=2.6",
+    # Pinned to match the pinned Intern-S2-Mobius remote code (ADR 0001).
+    "transformers==5.2.0",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+package = false

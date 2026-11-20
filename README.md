@@ -26,12 +26,16 @@ Notebook trên Google Colab sẽ tự động:
 
 ### Chạy cục bộ
 
+Cần [uv](https://docs.astral.sh/uv/). Huấn luyện cần GPU NVIDIA.
+
 ```bash
-python -m pip install -r projects/raikiri/requirements.txt
+uv sync
 
-python projects/raikiri/train.py
+uv run python projects/raikiri/train.py
 
-python projects/raikiri/generate.py
+uv run python projects/raikiri/generate.py
+
+uv run pytest   # unit test, không cần GPU
 ```
 
 Xem thêm [`projects/raikiri`](projects/raikiri) để biết cấu hình mô hình, thông tin huấn luyện và hướng dẫn sử dụng Google Colab.
