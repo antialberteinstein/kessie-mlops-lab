@@ -1,4 +1,4 @@
-accelerate>=1.10,<2
+accelerate>=1.15.0,<2
 datasets>=4,<6
 safetensors>=0.4.3
 scipy>=1.13
