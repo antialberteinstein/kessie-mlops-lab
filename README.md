@@ -45,8 +45,8 @@ Xem thêm [`projects/raikiri`](projects/raikiri) để biết cấu hình mô h�
 Trên máy Linux có NVIDIA GPU và NVIDIA Container Toolkit, chạy từ thư mục gốc:
 
 ```bash
-docker compose -f compose.raikiri.yaml up --build -d
-docker compose -f compose.raikiri.yaml logs -f train
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml up --build -d
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml logs -f train
 ```
 
 Dataset được mount từ `./dataset`, checkpoint và log TensorBoard được lưu tại

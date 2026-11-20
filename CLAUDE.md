@@ -11,11 +11,11 @@ Loại dự án: data/automation (pipeline huấn luyện), phát hành artifact
 - Môi trường dùng **uv**; notebook chạy bằng **Colab CLI** (`google-colab-cli`). **Bị loại:** Colab nối runtime local trên Mac (không có CUDA); pip + Colab web làm đường chính. [ADR 0004](docs/decisions/0004-uv-va-colab-cli.md)
 - Hai cách chạy notebook: **Colab CLI** (`tools/colab-cli/`, project uv riêng vì cần Python ≥ 3.13; token lấy từ `.env` được upload lên VM) và **Colab web** (token lấy từ Colab Secrets). Docker chỉ dùng để train trên máy có CUDA, không công bố model. **Bị loại:** `colab exec --env HF_TOKEN=…` (token bị ghi vào history), `getpass`, `uv tool install`. [ADR 0006](docs/decisions/0006-cach-chay-colab-cli-va-secret.md)
 - Luôn chạy Colab CLI qua `scripts/colab`: wrapper lưu token OAuth trong file 0600 thay vì Keychain (shell không tương tác không trả lời được hộp thoại Keychain). **Bị loại:** sửa code trong `.venv`, `--auth adc`. [ADR 0007](docs/decisions/0007-token-colab-cli-trong-file.md)
-- Cấu hình: `projects/raikiri/config.json` + biến môi trường ghi đè, **không có giá trị mặc định trong code**; `.env` chỉ chứa secret. **Bị loại:** dataclass có mặc định, file cấu hình dạng Python. [ADR 0005](docs/decisions/0005-cau-hinh-config-json.md). Việc chuyển đổi chưa xong: `config.py` vẫn còn mặc định cho tới khi issue chuyển đổi được merge. Không thêm mặc định mới vào đó.
+- Cấu hình: `projects/raikiri/config.json` + biến môi trường ghi đè, **không có giá trị mặc định trong code**; `.env` chỉ chứa secret. **Bị loại:** dataclass có mặc định, file cấu hình dạng Python. [ADR 0005](docs/decisions/0005-cau-hinh-config-json.md). Ghi đè bằng `RAIKIRI_<MỤC>_<KHOÁ>` (ví dụ `RAIKIRI_DATA_MAX_SAMPLES`). Compose đọc giá trị phía host từ `compose.raikiri.env` (`--env-file`), dùng `${VAR:?}` và không có `:-default`.
 
 ## Bố cục
 
-- `projects/raikiri/`: `config.py` (cấu hình, sắp chuyển sang JSON) · `data.py` (corpus, tokenizer, đóng gói) · `model.py` (dựng model, adapter) · `train.py` · `generate.py` · `docker_config.py` · `Dockerfile`.
+- `projects/raikiri/`: `config.json` (mọi giá trị cấu hình) · `config.py` (dataclass không mặc định, `load_config`, `exit_on_config_error`) · `data.py` (corpus, tokenizer, đóng gói) · `model.py` (dựng model, adapter) · `train.py` · `generate.py` · `Dockerfile`.
 - `pyproject.toml` + `uv.lock` (gốc repo, project ảo `package = false`): nguồn dependency duy nhất. Thêm hay đổi dependency thì sửa `pyproject.toml` rồi `uv lock`; không tạo lại `requirements.txt`.
 - `notebooks/train-raikiri.ipynb`: luồng Colab đầy đủ. `tests/`: unit test, không cần torch.
 - `compose.raikiri.yaml`: service `train` và `tensorboard`. `/dataset/`, `/artifacts/`, `/output/`: bị gitignore.
@@ -32,13 +32,15 @@ scripts/colab usage                                          # chưa đăng nh�
 scripts/colab new -s raikiri --gpu T4
 scripts/colab exec -s raikiri -f notebooks/train-raikiri.ipynb
 scripts/colab stop -s raikiri                                # luôn dừng VM khi xong
-docker compose -f compose.raikiri.yaml up --build -d         # chỉ trên Linux có GPU NVIDIA
+RAIKIRI_DATA_MAX_SAMPLES=1000 uv run python projects/raikiri/train.py   # ghi đè một khoá; hoặc truyền đường dẫn một file JSON khác
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml up --build -d   # chỉ trên Linux có GPU NVIDIA
 ```
 
 Chưa có lint/format.
 
 ## Quy ước
 
+- Cấu hình mới: thêm khoá vào `config.json` **và** field (không có default) vào dataclass trong `config.py`. Không dùng `os.environ.get(..., default)` hay `${VAR:-default}`. Điểm vào mới phải bắt `ConfigError` và gọi `exit_on_config_error`.
 - Test mới không được import torch/transformers ở mức module; dùng mock như các test hiện có để CI chạy không cần GPU.
 - Thông báo terminal có tiền tố `[Raikiri]`, `flush=True`. Theo phong cách code xung quanh (dùng `str.format`, import nặng đặt trong hàm).
 - Test notebook (`tests/test_raikiri_notebook.py`) dựa vào `id` của cell (`training`, `tensorboard`, `samples`): đổi id thì sửa test.

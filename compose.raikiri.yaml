@@ -1,5 +1,6 @@
 name: raikiri
 
+# Values come from compose.raikiri.env (pass it with --env-file); nothing is defaulted here.
 x-raikiri-image: &raikiri-image
   image: raikiri-train:local
   build:
@@ -11,18 +12,22 @@ services:
     <<: *raikiri-image
     init: true
     environment:
-      RAIKIRI_DATASET_NAME: ${RAIKIRI_DATASET_NAME:-/datasets}
-      RAIKIRI_MAX_SAMPLES: ${RAIKIRI_MAX_SAMPLES:-50000}
-      RAIKIRI_TEXT_COLUMN: ${RAIKIRI_TEXT_COLUMN:-text}
+      RAIKIRI_DATA_DATASET_NAME: ${RAIKIRI_DATA_DATASET_NAME:?set it in compose.raikiri.env}
+      # Fixed by the mounts below.
+      RAIKIRI_DATA_TOKENIZER_DIR: /workspace/artifacts/raikiri/tokenizer
+      RAIKIRI_TRAIN_OUTPUT_DIR: /workspace/artifacts/raikiri/checkpoints
+      # Passed through only when set in the shell; otherwise config.json applies.
+      RAIKIRI_DATA_MAX_SAMPLES:
+      RAIKIRI_DATA_TEXT_COLUMN:
     volumes:
       - type: bind
-        source: ${RAIKIRI_DATA_DIR:-./dataset}
+        source: ${RAIKIRI_HOST_DATASET_DIR:?set it in compose.raikiri.env}
         target: /datasets
         read_only: true
         bind:
           create_host_path: false
       - type: bind
-        source: ${RAIKIRI_ARTIFACT_DIR:-./artifacts/raikiri}
+        source: ${RAIKIRI_HOST_ARTIFACT_DIR:?set it in compose.raikiri.env}
         target: /workspace/artifacts/raikiri
     deploy:
       resources:
@@ -44,10 +49,10 @@ services:
       - --port
       - "6006"
     ports:
-      - "${RAIKIRI_TB_BIND:-127.0.0.1}:${RAIKIRI_TB_PORT:-6006}:6006"
+      - "${RAIKIRI_HOST_TB_BIND:?set it in compose.raikiri.env}:${RAIKIRI_HOST_TB_PORT:?set it in compose.raikiri.env}:6006"
     volumes:
       - type: bind
-        source: ${RAIKIRI_ARTIFACT_DIR:-./artifacts/raikiri}
+        source: ${RAIKIRI_HOST_ARTIFACT_DIR:?set it in compose.raikiri.env}
         target: /workspace/artifacts/raikiri
         read_only: true
     restart: unless-stopped

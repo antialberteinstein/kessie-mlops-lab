@@ -3,7 +3,7 @@
 ## Biện pháp đã triển khai
 - Xác thực: không có tài khoản người dùng. Secret duy nhất là `HF_TOKEN` (quyền ghi), lưu ở `.env` hoặc Colab Secrets.
 - Code bên ngoài: `trust_remote_code=True` chỉ với revision `internlm/Intern-S2-Mobius` đã ghim (ADR 0001).
-- Cấu hình: hiện `train.py` thực thi file cấu hình Python do người dùng truyền vào; sẽ bỏ khi chuyển sang `config.json` (ADR 0005).
+- Cấu hình: chỉ đọc JSON (`config.json` hoặc file JSON được truyền vào) và biến môi trường; không thực thi file cấu hình (ADR 0005, #5).
 - Lỗi: chỉ hiển thị thông báo đã map theo mã; không hiển thị/log payload server, token, credentials.
 - Secret: chỉ biến public trong client; secret nằm ở server/vault/CI secrets.
 - Log: không log dữ liệu cá nhân hoặc tài chính.

@@ -2,11 +2,16 @@
 
 import torch
 
-from config import DATA, MODEL, TRAIN
+from config import ConfigError, exit_on_config_error, load_config
 from model import load_trained_model
 
 
 def main():
+    try:
+        DATA, MODEL, TRAIN = load_config()
+    except ConfigError as error:
+        exit_on_config_error(error)
+
     from transformers import AutoTokenizer
 
     tokenizer = AutoTokenizer.from_pretrained(TRAIN.output_dir, trust_remote_code=True)

@@ -45,8 +45,8 @@ See [`projects/raikiri`](projects/raikiri) for model configuration, training det
 On a Linux host with an NVIDIA GPU and NVIDIA Container Toolkit:
 
 ```bash
-docker compose -f compose.raikiri.yaml up --build -d
-docker compose -f compose.raikiri.yaml logs -f train
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml up --build -d
+docker compose --env-file compose.raikiri.env -f compose.raikiri.yaml logs -f train
 ```
 
 The dataset is mounted from `./dataset`; checkpoints and TensorBoard logs are
