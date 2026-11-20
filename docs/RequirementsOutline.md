@@ -1,6 +1,6 @@
 # kessie-mlops-lab — Requirements Outline
 
-> Trạng thái: **Nháp, chờ duyệt** trong PR kickoff. Đây là nguồn sự thật về hành vi; agent đề xuất, người dùng duyệt. Khi prompt, module breakdown hay issue mâu thuẫn với file này, file này thắng. Cập nhật lần cuối: 2026-11-21.
+> Trạng thái: **Đã duyệt 2026-11-21.** Đây là nguồn sự thật về hành vi; agent đề xuất, người dùng duyệt. Khi prompt, module breakdown hay issue mâu thuẫn với file này, file này thắng. Cập nhật lần cuối: 2026-11-21.
 
 ## 1. Mục tiêu và phạm vi
 - Người dùng: chủ repo (một người), cùng người tải model từ Hugging Face Hub.
@@ -45,6 +45,7 @@ Chi tiết luồng và tiêu chí nghiệm thu: `docs/modules/raikiri.md`.
 - Chỉ có `eval_loss`, chưa có benchmark tiếng Việt.
 - Phải tin remote code của upstream ở revision đã ghim.
 - Chưa có ngưỡng chất lượng hay trần compute unit.
+- AC-15 (Docker Compose trên Linux có GPU) chưa có máy để xác minh; không thuộc 0.1.0.
 
 ## Lịch sử quyết định
 
@@ -53,3 +54,4 @@ Chi tiết luồng và tiêu chí nghiệm thu: `docs/modules/raikiri.md`.
 | 2026-11-21 | Khởi tạo đặc tả khi tiếp nhận repo | Repo đã có code nhưng chưa có đặc tả | — |
 | 2026-11-21 | Chạy notebook bằng Colab CLI; môi trường dùng uv | Chủ repo chốt | AC-06, AC-07 |
 | 2026-11-21 | Cấu hình bằng `config.json` + env, không mặc định trong code | Chủ repo chốt, theo quy tắc chung | AC-08 → AC-10 |
+| 2026-11-21 | Duyệt đặc tả v1 (idea brief, outline, Raikiri AC-01 → AC-16) | Chủ repo duyệt sau khi merge PR #2 | — |

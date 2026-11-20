@@ -28,3 +28,8 @@ Mẫu một mục:
 - **Yêu cầu:** Đồng ý ("ok") với ba đề xuất sau PR kickoff: tạo issue cho phần việc đã tách, bật bảo vệ `main`, thêm skill của stack vào CLAUDE.md.
 - **Quyết định:** Thêm `pytorch-patterns`, `mle-workflow`, `python-testing` vào mục "Skill bổ trợ". Issue #3 (uv), #4 (Colab CLI), #5 (`config.json`), #6 (README). Bảo vệ `main` do chủ repo tự bật.
 - **Kết quả:** PR #2, issue #3–#6.
+
+## 2026-11-21 · `/kessie-skills:proj plan`
+- **Yêu cầu:** Merge PR #2, xoá nhánh local, duyệt đặc tả, lên kế hoạch milestone 0.1.0.
+- **Quyết định:** Đặc tả v1 (idea brief, outline, Raikiri AC-01 → AC-16) được duyệt. Milestone 0.1.0 "Raikiri chạy đầu-cuối bằng Colab CLI": #3 → #5 → kiểm tra đầu vào → #4 → Verify T4 → #6. Bỏ issue Verify Docker (không có máy Linux có GPU); AC-15 ghi vào "Giới hạn hiện tại".
+- **Kết quả:** PR duyệt đặc tả, milestone 0.1.0, issue mới cho kiểm tra đầu vào và Verify T4.

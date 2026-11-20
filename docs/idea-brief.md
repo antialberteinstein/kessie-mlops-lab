@@ -1,6 +1,6 @@
 # Idea brief — kessie-mlops-lab / Raikiri
 
-**Ngày:** 2026-11-21 · **Người quyết định:** chủ repo · **Trạng thái:** Đề xuất (chờ duyệt trong PR kickoff)
+**Ngày:** 2026-11-21 · **Người quyết định:** chủ repo · **Trạng thái:** Đã duyệt 2026-11-21
 
 > Ghi lại hồi tố khi tiếp nhận repo đang có code. Phần đã chốt trong hội thoại được đánh dấu "(đã chốt)".
 

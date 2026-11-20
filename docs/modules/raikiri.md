@@ -1,6 +1,6 @@
 # Raikiri — Module breakdown
 
-> Trạng thái: **Nháp, chờ duyệt**. Đặc tả cuối cùng vẫn là `docs/RequirementsOutline.md` §3.
+> Trạng thái: **Đã duyệt 2026-11-21.** Đặc tả cuối cùng vẫn là `docs/RequirementsOutline.md` §3.
 
 ## 1. Khả năng cần đạt
 - Huấn luyện Raikiri từ đầu trên một GPU T4 với cấu hình trong `projects/raikiri/config.json`.
