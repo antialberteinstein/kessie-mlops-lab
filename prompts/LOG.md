@@ -57,3 +57,11 @@ Mẫu một mục:
   - `train.py` nhận file JSON khác; bỏ `docker_config.py`.
   - Compose dùng `compose.raikiri.env` + `${VAR:?}`; biến host đổi tên sang `RAIKIRI_HOST_*`.
 - **Kết quả:** PR cho #5 (nhánh `feat/5-config-json`).
+
+## 2026-11-21 · `/kessie-skills:proj build #15`
+- **Yêu cầu:** Merge PR #20 rồi làm #15: kiểm tra đầu vào sớm và thêm test cho checkpoint, tokenizer.
+- **Quyết định:**
+  - `train.py` gọi `require_cuda()` sau khi nạp cấu hình, trước khi tải dữ liệu (AC-13).
+  - `load_corpus` kiểm tra cột văn bản trước khi tách tập (AC-12).
+  - AC-05 và AC-11 đã có code, chỉ thêm test.
+- **Kết quả:** PR cho #15 (nhánh `feat/15-input-checks`).

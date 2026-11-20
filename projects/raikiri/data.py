@@ -35,6 +35,12 @@ def load_corpus(config: DataConfig):
                 "max_samples": config.max_samples,
             },
         )
+    if config.text_column not in corpus.column_names:
+        raise ValueError(
+            "Text column {!r} not found in dataset {!r}; available columns: {}".format(
+                config.text_column, config.dataset_name, ", ".join(corpus.column_names)
+            )
+        )
     splits = corpus.train_test_split(test_size=config.validation_fraction, seed=config.seed)
     return DatasetDict(train=splits["train"], validation=splits["test"])
 

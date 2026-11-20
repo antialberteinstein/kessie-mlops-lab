@@ -15,6 +15,10 @@ class FakeDataset:
     def __init__(self, rows):
         self.rows = rows
 
+    @property
+    def column_names(self):
+        return sorted(self.rows[0])
+
     @classmethod
     def from_generator(cls, generator, gen_kwargs):
         return cls(list(generator(**gen_kwargs)))
@@ -46,7 +50,7 @@ def test_capped_corpus_streams_only_requested_rows():
     module.load_dataset = load_dataset
     config = SimpleNamespace(
         dataset_name="sample/wiki", dataset_split="train", max_samples=4,
-        validation_fraction=0.25, seed=42,
+        validation_fraction=0.25, seed=42, text_column="text",
     )
     with patch.dict(sys.modules, {"datasets": module}):
         result = data.load_corpus(config)
@@ -68,7 +72,7 @@ def test_uncapped_corpus_uses_regular_dataset():
     module.load_dataset = load_dataset
     config = SimpleNamespace(
         dataset_name="sample/wiki", dataset_split="train", max_samples=None,
-        validation_fraction=0.25, seed=42,
+        validation_fraction=0.25, seed=42, text_column="text",
     )
     with patch.dict(sys.modules, {"datasets": module}):
         result = data.load_corpus(config)
